@@ -6,12 +6,24 @@ spring:
     url: jdbc:mysql://localhost:3306/managament_system?serverTimezone=GMT%2b8
     username: root
     password: 123456
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
 mybatis:
   mapper-locations: classpath:mapper/*.xml #?????mybatis??
 #  configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+servlet:
+  multipart:
+    max-file-size: 200000MB
+    max-request-size: 2000000MB
 
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+files:
+  upload:
+    path: E:/AppData/JAVA_Project/managment_spring/managment_spring/files/

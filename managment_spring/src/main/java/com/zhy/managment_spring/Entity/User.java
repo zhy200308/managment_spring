@@ -4,13 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-
-import javax.persistence.Id;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.temporal.ValueRange;
+import lombok.ToString;
 
 /**
  * @author zhy
@@ -18,12 +13,13 @@ import java.time.temporal.ValueRange;
  */
 @Data
 @TableName(value="user")
-public class User {
+@ToString
 
+public class User {
     @TableId(type = IdType.INPUT)
     private String  id;
-    private String username;
     private String password;
+    private String username;
     private String role;
     private String email;
     private String nickname;
@@ -31,6 +27,7 @@ public class User {
     private String address;
     @TableField(value = "creatTime")
     private String creatTime;
-
+    @TableField(value = "avatarUrl")
+    private String avatarUrl;
 
 }

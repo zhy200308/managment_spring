@@ -1,14 +1,18 @@
 package com.zhy.managment_spring.Service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhy.managment_spring.Entity.User;
+import com.zhy.managment_spring.Entity.UserLoginDto;
+import com.zhy.managment_spring.Entity.UserRegisterDto;
+import com.zhy.managment_spring.Entity.UserUpdateDto;
 import com.zhy.managment_spring.Mapper.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.zhy.managment_spring.common.Constants;
+import com.zhy.managment_spring.exception.ServiceException;
+import com.zhy.managment_spring.utils.TokenUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -31,11 +35,88 @@ public class UserService extends ServiceImpl<UserMapper ,User> {
         }
     }
 
+    public void saveOrUpdateUser(User user) {
+        if (user.getId() == null) {
+            user.setId(UUID.randomUUID().toString().replace("-","").toLowerCase());
+        }
+        this.saveOrUpdate(user);
+    }
+
+    public UserLoginDto login(UserLoginDto userLoginDto) {
+        User one=getUserLoginInfo(userLoginDto);
+        if (one!=null){
+            BeanUtil.copyProperties(one,userLoginDto,true);
+            //设置token
+            String token=TokenUtils.getToken(one.getId().toString(),one.getPassword());
+            userLoginDto.setToken(token);
+            return userLoginDto;
+        }else {
+            throw new ServiceException(Constants.CODE_600,"用户名或密码错误");
+        }
 
 
-    /**
-     * Mybatis写法
-     * */
+    }
+
+    public User register(UserRegisterDto userRegisterDto) {
+        User one=getUserRegistreInfo(userRegisterDto);
+        if (one ==null){
+            one =new User();
+            BeanUtil.copyProperties(userRegisterDto,one,true);
+            saveUser(one);
+        }else {
+            throw new ServiceException(Constants.CODE_600,"用户已经存在");
+        }
+        return null;
+    }
+
+    private User getUserLoginInfo(UserLoginDto userLoginDto){
+        QueryWrapper<User> queryWrapperL=new QueryWrapper<>();
+        queryWrapperL.eq("username",userLoginDto.getUsername());
+        queryWrapperL.eq("password",userLoginDto.getPassword());
+
+        User one;
+        try{
+            one = getOne(queryWrapperL);
+
+        }catch (Exception e){
+            throw new ServiceException(Constants.CODE_500,"系统错误");
+        }
+        return one;
+    }
+    private User getUserRegistreInfo(UserRegisterDto userRegisterDto){
+        QueryWrapper<User> RegisterWrapper =new QueryWrapper<>();
+        RegisterWrapper.eq("username",userRegisterDto.getUsername());
+        RegisterWrapper.eq("password",userRegisterDto.getPassword());
+
+        User one;
+        try{
+            one = getOne(RegisterWrapper);
+
+        }catch (Exception e){
+            throw new ServiceException(Constants.CODE_500,"注册失败，用户已经存在");
+        }
+        return one;
+    }
+    //返回前端的数据
+    public UserUpdateDto userToUserDTO(User user) {
+        UserUpdateDto userUpdateDto = new UserUpdateDto();
+        userUpdateDto.setUsername(user.getUsername());
+        userUpdateDto.setPassword(user.getPassword());
+        userUpdateDto.setRole(user.getRole());
+        userUpdateDto.setEmail(user.getEmail());
+        userUpdateDto.setNickname(user.getNickname());
+        userUpdateDto.setPhone(user.getPhone());
+        userUpdateDto.setAddress(user.getAddress());
+        userUpdateDto.setAvatarUrl(user.getAvatarUrl());
+        return userUpdateDto;
+    }
+
+
+}
+
+/**
+ * Mybatis写法
+ * */
 
 //    @Autowired
 //    private UserMapper userMapper;
@@ -79,7 +160,3 @@ public class UserService extends ServiceImpl<UserMapper ,User> {
 //            return -1; // 示例中返回-1表示异常
 //        }
 //    }
-
-
-
-}
