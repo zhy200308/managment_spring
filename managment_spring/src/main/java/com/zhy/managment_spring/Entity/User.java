@@ -1,11 +1,15 @@
 package com.zhy.managment_spring.Entity;
 
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * @author zhy
@@ -26,8 +30,12 @@ public class User {
     private String phone;
     private String address;
     @TableField(value = "creatTime")
-    private String creatTime;
+    private Date creatTime;
     @TableField(value = "avatarUrl")
     private String avatarUrl;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "GMT+8")
+    public Date getCreatTime() {
+        return creatTime;
+    }
 }

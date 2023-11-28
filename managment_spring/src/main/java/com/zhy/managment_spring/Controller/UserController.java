@@ -93,6 +93,7 @@ public class UserController {
         // 在此处处理批量删除逻辑
         return userService.removeByIds(ids);
     }
+
     /*
      *导出
      * */
@@ -111,21 +112,6 @@ public class UserController {
             BeanUtils.copyProperties(user, userDto);
             list.add(userDto);
         }
-        // 对列表进行排序
-//        list.sort(Comparator.comparing(UserDto::getUsername)
-//                .thenComparing(UserDto::getRole)
-//                .thenComparing(UserDto::getRole)
-//                .thenComparing(UserDto::getPhone)
-//                .thenComparing(UserDto::getEmail)
-//                .thenComparing(UserDto::getAddress)
-//                .thenComparing(UserDto::getAvatarUrl));
-        // 排除不需要导出的字段
-//        for (User user : list) {
-//            // 设置id和password字段为空或null，以排除它们
-//            user.setId(null);
-//            user.setPassword(null);
-//        }
-
         // 设置浏览器响应的格式
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
         String fileName = URLEncoder.encode("管理员信息", "UTF-8");
@@ -152,36 +138,7 @@ public class UserController {
         writer.flush(out, true);
         writer.close();
 
-              /*   //查询所有数据
-        List<User> list=userService.list();
-        //通过工具类创建writer写到磁盘路径
-        ExcelWriter writer= ExcelUtil.getWriter(true);
-        //自定义别名
-        writer.addHeaderAlias("username","用户名");
-        writer.addHeaderAlias("password","密码");
-        writer.addHeaderAlias("nickname","昵称");
-        writer.addHeaderAlias("role","角色");
-        writer.addHeaderAlias("email", "邮箱");
-        writer.addHeaderAlias("phone","电话");
-        writer.addHeaderAlias("address","地址");
-        writer.addHeaderAlias("createTime","创建时间");
-        writer.addHeaderAlias("avatarUrl","头像");
-        //一次性写出list内的对象到excel，使用默认的样式，强制输出标题
-        writer.write(list, true);
-        //设置浏览器响应的格式
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        String fileName= URLEncoder.encode("管理员信息","UTF-8");
-        response.setHeader("Content-Disposition","attachment;filename="+fileName+".xlsx");
-        ServletOutputStream out=response.getOutputStream();
-        writer.flush(out,true);
-        out.close();
-        writer.close();*/
     }
-
-
-
-
-
     /*
      * 导入
      * */
@@ -236,48 +193,5 @@ public class UserController {
         return Result.success(userService.getOne(queryWrapper));
     }
 
-    /**
-     * Mybatis写法
-     * */
-
-
-//    @PostMapping
-//    public Integer save(@RequestBody User user){
-//        return userService.save(user);
-//    }
-//
-//
-//    @GetMapping
-//    public List<User> findUserAll(){
-//
-//
-//        return userService.findAll();
-//    }
-//    @DeleteMapping("/{id}")
-//    public Integer deleteById(@PathVariable Integer id){
-//        return  userService.deleteById(id);
-//    }
-//    @GetMapping("/findById/{id}")
-//    public User findLimitById(@PathVariable Integer id){
-//        return userService.findLimitById(id);
-//    }
-////    分页查询
-////    接口路径：/user/page
-////    @RequestParam接受 ？pagNum=1&pageSize=1
-////    limit第一个参数=（pageNum-1）*pageSize
-//    @GetMapping("/page")
-//    public Map<String ,Object> findPage(@RequestParam Integer pageNum,
-//                                        @RequestParam Integer pageSize ,
-//                                        @RequestParam String username,
-//                                        @RequestParam String email,
-//                                        @RequestParam String phone){
-//        pageNum=(pageNum-1)*pageSize;
-//        Integer  Total=userService.selectPageTotal(username,email,phone);
-//        List<User> data= (List<User>) userService.selectPage(pageNum,pageSize,username,email,phone);
-//    Map<String ,Object> res=new HashMap<>();
-//    res.put("data",data);
-//    res.put("Total",Total);
-//    return res;
-//    }
 
 }

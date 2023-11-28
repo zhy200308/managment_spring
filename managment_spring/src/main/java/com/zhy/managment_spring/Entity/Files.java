@@ -21,4 +21,7 @@ public class Files {
     private String url;
     private Boolean is_delete;
     private Boolean enable;
+
+    //userId作为外键链接user表中id字段
+//    private String userId;
 }

@@ -8,8 +8,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhy.managment_spring.Entity.Files;
+import com.zhy.managment_spring.Entity.User;
 import com.zhy.managment_spring.Service.FileService;
+import com.zhy.managment_spring.common.Constants;
 import com.zhy.managment_spring.common.Result;
+import com.zhy.managment_spring.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -36,18 +39,17 @@ public class FilesController {
 
     @Autowired
     private FileService fileService;
-
     @PostMapping("/update")
     public Result updateFiles(@RequestBody Files files) {
 
-    return Result.success(fileService.updateById(files));
+        return Result.success(fileService.updateById(files));
     }
 
     @GetMapping("/page")
     public Result findPage(@RequestParam Integer pageNum,
                            @RequestParam Integer pageSize ,
                            @RequestParam(defaultValue = "") String name
-                               ){
+    ){
 
         IPage<Files> page=new Page<>(pageNum,pageSize);
         QueryWrapper<Files> queryWrapper=new QueryWrapper<>();
@@ -83,6 +85,7 @@ public class FilesController {
     public String upload(@RequestParam MultipartFile file)throws IOException{
         String originalFilename=file.getOriginalFilename();
         String type= FileUtil.extName(originalFilename);
+
         long size=file.getSize();
         //定义一个文件唯一的标识码
         String uuid= IdUtil.fastSimpleUUID();
@@ -96,18 +99,18 @@ public class FilesController {
         //获取文件的url
         String url;
         file.transferTo(uploadFile);
-            //获取文件的MD5
-            String  md5= SecureUtil.md5(uploadFile);
-            Files dbFiles=getFileByMd5(md5);
+        //获取文件的MD5
+        String  md5= SecureUtil.md5(uploadFile);
+        Files dbFiles=getFileByMd5(md5);
 
-            if (dbFiles!=null){
-                url=dbFiles.getUrl();
-                uploadFile.delete();
-            }else {
-                //把获取的文件存储到磁盘目录
+        if (dbFiles!=null){
+            url=dbFiles.getUrl();
+            uploadFile.delete();
+        }else {
+            //把获取的文件存储到磁盘目录
 
-                url="http://localhost:8081/files/"+fileUUID;
-            }
+            url="http://localhost:9099/files/"+fileUUID;
+        }
         //存储到数据库
         Files saveFile=new Files();
         saveFile.setName(originalFilename);
@@ -115,6 +118,7 @@ public class FilesController {
         saveFile.setSize(size/1024);
         saveFile.setUrl(url);
         saveFile.setMd5(md5);
+
         fileService.saveFiles(saveFile);
         return url;
 
@@ -147,7 +151,6 @@ public class FilesController {
         }
     }
 
-
     private Files getFileByMd5(String md5){
         //查询文件的md5是否存在
         QueryWrapper<Files> queryWrapper=new QueryWrapper<>();
@@ -156,5 +159,4 @@ public class FilesController {
 
         return filesList.size()==0 ?null :filesList.get(0);
     }
-
 }

@@ -11,6 +11,7 @@ import com.zhy.managment_spring.Mapper.UserMapper;
 import com.zhy.managment_spring.common.Constants;
 import com.zhy.managment_spring.exception.ServiceException;
 import com.zhy.managment_spring.utils.TokenUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -21,6 +22,7 @@ import java.util.UUID;
  */
 @Service
 public class UserService extends ServiceImpl<UserMapper ,User> {
+
     /**
      * Mybatis-plus写法
      * */
@@ -58,16 +60,27 @@ public class UserService extends ServiceImpl<UserMapper ,User> {
     }
 
     public User register(UserRegisterDto userRegisterDto) {
-        User one=getUserRegistreInfo(userRegisterDto);
-        if (one ==null){
-            one =new User();
-            BeanUtil.copyProperties(userRegisterDto,one,true);
-            saveUser(one);
-        }else {
-            throw new ServiceException(Constants.CODE_600,"用户已经存在");
+        String username = userRegisterDto.getUsername();
+        String password = userRegisterDto.getPassword();
+
+        // 检查用户名是否已存在
+        if (isUsernameExists(username)) {
+            throw new ServiceException(Constants.CODE_600, "用户已经存在");
         }
-        return null;
+
+        // 如果用户名不存在，执行注册逻辑
+        User newUser = new User();
+        BeanUtil.copyProperties(userRegisterDto, newUser, true);
+        saveUser(newUser);
+
+        return newUser;
     }
+    private boolean isUsernameExists(String username) {
+        QueryWrapper<User> usernameCheckWrapper = new QueryWrapper<>();
+        usernameCheckWrapper.eq("username", username);
+        return count(usernameCheckWrapper) > 0;
+    }
+
 
     private User getUserLoginInfo(UserLoginDto userLoginDto){
         QueryWrapper<User> queryWrapperL=new QueryWrapper<>();
@@ -83,20 +96,7 @@ public class UserService extends ServiceImpl<UserMapper ,User> {
         }
         return one;
     }
-    private User getUserRegistreInfo(UserRegisterDto userRegisterDto){
-        QueryWrapper<User> RegisterWrapper =new QueryWrapper<>();
-        RegisterWrapper.eq("username",userRegisterDto.getUsername());
-        RegisterWrapper.eq("password",userRegisterDto.getPassword());
 
-        User one;
-        try{
-            one = getOne(RegisterWrapper);
-
-        }catch (Exception e){
-            throw new ServiceException(Constants.CODE_500,"注册失败，用户已经存在");
-        }
-        return one;
-    }
     //返回前端的数据
     public UserUpdateDto userToUserDTO(User user) {
         UserUpdateDto userUpdateDto = new UserUpdateDto();
@@ -113,50 +113,3 @@ public class UserService extends ServiceImpl<UserMapper ,User> {
 
 
 }
-
-/**
- * Mybatis写法
- * */
-
-//    @Autowired
-//    private UserMapper userMapper;
-//
-//    public int save(User user) {
-//        if (user.getId() == null || user.getId().isEmpty()) {
-//            user.setId(UUID.randomUUID().toString().replace("-","").toLowerCase());  // 生成新的 UUID
-//            return userMapper.insert(user);
-//        } else {
-//            return userMapper.updateById(user);
-//        }
-//    }
-//
-//    public List<User> findAll(){
-//        return userMapper.findAll();
-//    }
-//
-//
-//    public Integer deleteById(Integer id) {
-//        return userMapper.deleteById(id);
-//    }
-//
-//    public User findLimitById(Integer id) {
-//        return userMapper.findLimitById(id);
-//    }
-//
-//
-//    public List<User> selectPage(Integer pageNum, Integer pageSize,String username,String email,String phone) {
-//    return userMapper.selectPage(pageNum,pageSize,username,email,phone);
-//    }
-//
-//
-//    public Integer selectPageTotal(String username , String email , String phone) {
-//        try {
-//            Integer  total = userMapper.selectPageTotal(username, email, phone);
-//            return total;
-//        } catch (Exception e) {
-//            // 捕获异常并输出错误信息
-//            e.printStackTrace();
-//            // 可以根据需要进行异常处理，比如记录日志或者返回特定的错误码
-//            return -1; // 示例中返回-1表示异常
-//        }
-//    }
